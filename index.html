@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slot O'yini</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #1c1c1c;
+            margin: 0;
+        }
+        .slot-game {
+            text-align: center;
+            background-color: #2d2d2d;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+            width: 350px;
+        }
+        h2 {
+            color: #f1f1f1;
+            margin-bottom: 20px;
+        }
+        .balance, .bet {
+            margin: 15px 0;
+            font-size: 18px;
+            color: #f1f1f1;
+        }
+        .bet {
+            background-color: #444;
+            padding: 15px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .bet input {
+            width: 60%;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 18px;
+            margin-right: 10px;
+        }
+        .bet button {
+            background-color: #28a745;
+            padding: 8px 20px;
+            font-size: 18px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .bet button:hover {
+            background-color: #218838;
+        }
+        .slot {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            font-size: 30px;
+        }
+        .slot div {
+            width: 60px;
+            height: 60px;
+            margin: 0 10px;
+            background-color: #444;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+        .spin-btn {
+            padding: 10px 20px;
+            font-size: 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            width: 100%;
+            margin-top: 15px;
+            transition: background-color 0.3s;
+        }
+        .spin-btn:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <div class="slot-game">
+        <h2>Slot O'yini</h2>
+        <div class="balance">Balans: <span id="balance">0</span> so'm</div>
+        <div class="bet">
+            <input type="number" id="betAmount" value="10" min="10" placeholder="Tikish miqdori">
+            <button onclick="doubleBet()">x2</button>
+            <button onclick="halfBet()">/2</button>
+        </div>
+        <div class="slot">
+            <div id="slot1">🍒</div>
+            <div id="slot2">🍋</div>
+            <div id="slot3">🍉</div>
+        </div>
+        <button class="spin-btn" onclick="spin()">Spin</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        let balance = 0; // Balansni boshlang'ich qiymatini 0 qilib belgiladik
+        const fruits = ["🍒", "🍋", "🍉", "🍇", "🍊"];
+        let totalSpins = 0; // umumiy spinlar soni
+        let totalWins = 0; // umumiy yutuqlar soni
+
+        function updateBalance() {
+            document.getElementById('balance').innerText = balance;
+        }
+
+        function doubleBet() {
+            const betInput = document.getElementById('betAmount');
+            betInput.value = parseInt(betInput.value) * 2;
+        }
+
+        function halfBet() {
+            const betInput = document.getElementById('betAmount');
+            betInput.value = Math.max(10, Math.floor(parseInt(betInput.value) / 2));
+        }
+
+        function spin() {
+            let betAmount = parseInt(document.getElementById('betAmount').value);
+
+            // 0 balans bilan ham tikish mumkin bo'lishi uchun shart qo'shish
+            if (balance === 0 && betAmount === 10) {
+                balance = 10; // Balansni 10 so'mga o'zgartiramiz
+            }
+
+            if (betAmount > balance) {
+                document.getElementById('result').innerText = "Balansingiz yetarli emas!";
+                return;
+            }
+            if (betAmount <= 0) {
+                document.getElementById('result').innerText = "Iltimos, to'g'ri tikish miqdorini kiriting!";
+                return;
+            }
+
+            balance -= betAmount;
+            updateBalance();
+            document.getElementById('result').innerText = "";
+
+            // 10 ta spin va 4 ta yutuqni tasodifiy ravishda taqsimlash
+            totalSpins++;
+            if (Math.random() < 0.4) { // 40% ehtimol bilan yutish
+                totalWins++;
+            }
+
+            animateSlot("slot1", 2000);
+            animateSlot("slot2", 3000);
+            animateSlot("slot3", 4000, () => {
+                const slot1 = document.getElementById('slot1').innerText;
+                const slot2 = document.getElementById('slot2').innerText;
+                const slot3 = document.getElementById('slot3').innerText;
+
+                // Agar barcha ramzlar bir xil bo'lsa, yutish
+                if (slot1 === slot2 && slot2 === slot3) {
+                    let winAmount = betAmount * 20;
+                    // 0 balans bilan o'ynaganda yutishni 4 barobar oshiramiz
+                    if (balance === 10) {
+                        winAmount = betAmount * 4;
+                    }
+                    balance += winAmount;
+                    document.getElementById('result').innerText = `Tabriklaymiz! Siz ${winAmount} so'm yutdingiz!`;
+                } else {
+                    document.getElementById('result').innerText = "Afsus, bu safar omad kulmadi.";
+                }
+
+                // Agar 10 spin ichida 4 ta yutuq bo'lsa, maxsus xabar chiqarish
+                if (totalSpins === 10 && totalWins === 4) {
+                    document.getElementById('result').innerText = "Tabriklaymiz! Siz 10 ta spin ichida 4 ta yutuq topdingiz!";
+                }
+
+                updateBalance();
+            });
+        }
+
+        function animateSlot(slotId, duration, callback) {
+            const slot = document.getElementById(slotId);
+            let time = 0;
+            const interval = 100;
+
+            const animation = setInterval(() => {
+                slot.innerText = fruits[Math.floor(Math.random() * fruits.length)];
+                time += interval;
+
+                if (time > duration - 500) {
+                    clearInterval(animation);
+                    slot.innerText = fruits[Math.floor(Math.random() * fruits.length)];
+                    if (callback) callback();
+                }
+            }, interval);
+        }
+    </script>
+</body>
+</html>
+
+
